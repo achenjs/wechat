@@ -1,5 +1,5 @@
 'use strict'
-
+const port = 80
 const Koa = require('koa')
 const g = require('./wechat/g')
 const path = require('path')
@@ -22,6 +22,6 @@ const config = {
 
 const app = new Koa()
 
-app.use(g(config.wechat)).listen(1234)
+app.use(g(config.wechat)).listen(port)
 
-console.log('listening: 1234')
+console.log('listening: ' + port)

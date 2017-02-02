@@ -4,8 +4,28 @@ const sha1 = require('sha1')
 const Wechat = require('./wechat')
 const getRawBody = require('raw-body')
 const util = require('./util')
+const WechatAPI = require('wechat-api')
+const V100 = require('../config/V100')
+const path = require('path')
+
 module.exports = function(opts) {
-  // const wechat = new Wechat(opts)
+  new Wechat(opts)
+  const api = new WechatAPI(opts.appID, opts.appSecret)
+  api.createMenu(require('../config/menu'), function(err, result) {
+    if(err) {
+      console.error(err)
+    } else {
+
+    }
+  })
+  api.createLimitQRCode(100, function(err, result) {
+    if(err) {
+      console.log(err)
+    } else {
+      const ticket = result.ticket
+      console.log(api.showQRCodeURL(ticket))
+    }
+  });
 
   return function *(next) {
     var that = this
@@ -52,10 +72,59 @@ module.exports = function(opts) {
                       '<FromUserName><![CDATA['+ message.ToUserName +']]></FromUserName>' +
                       '<CreateTime>'+ now +'</CreateTime>' +
                       '<MsgType><![CDATA[text]]></MsgType>' +
-                      '<Content><![CDATA[Hi, Imooc 同学！]]></Content>' +
+                      '<Content><![CDATA[Hi, 欢迎来到我的测试公众号！]]></Content>' +
                       '</xml>'
           return true
         }
+        // 点击菜单
+        if(message.Event === 'CLICK') {
+          const EventKey = message.EventKey
+          switch (EventKey) {
+            case 'V100_001':
+            api.sendText(message.FromUserName, '不给红包你咬我！', function(err, result) {
+              if(err) {
+                console.log(err)
+              } else {
+
+              }
+            })
+            break;
+            case 'V100_002':
+            api.uploadMedia(path.join(__dirname, '../', 'images/qrcode.jpg'), 'image', function(err, result) {
+              if(err) {
+                console.log(err)
+              } else {
+                api.sendImage(message.FromUserName, result.media_id, function(err, result01) {
+                  if(err) {
+                    console.log(err)
+                  } else {
+
+                  }
+                });
+              }
+            })
+            break;
+            case 'V100_003':
+            api.sendNews(message.FromUserName, V100.articles, function(err, result) {
+              if(err) {
+                console.log(err)
+              } else {
+
+              }
+            })
+            break;
+          }
+        }
+      }
+      // 用户发送消息
+      if(message.MsgType === 'text') {
+        api.sendText(message.FromUserName, 'Hello！', function (err, result) {
+          if(err) {
+            console.log(err)
+          } else {
+
+          }
+        })
       }
     }
   }

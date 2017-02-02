@@ -4,7 +4,8 @@ const Promise = require('bluebird')
 const request = Promise.promisify(require('request'))
 const prefix = 'https://api.weixin.qq.com/cgi-bin/'
 const api = {
-  accessToken: prefix + 'token?grant_type=client_credential'
+  accessToken: prefix + 'token?grant_type=client_credential',
+  createMenu: prefix + 'menu/create'
 }
 
 function Wechat(opts) {
@@ -23,7 +24,7 @@ function Wechat(opts) {
       }
 
       if(that.isValidAccessToken(data)) {
-        Promise.resolve(data)
+        return Promise.resolve(data)
       } else {
         return that.updateAccessToken()
       }
@@ -31,16 +32,18 @@ function Wechat(opts) {
     .then(function(data) {
       that.access_token = data.access_token
       that.expires_in = data.expires_in
-
       that.saveAccessToken(data)
     })
+      .catch(function(err) {
+        console.info(err)
+      })
 }
 
 Wechat.prototype.isValidAccessToken = function (data) {
     if(!data || !data.access_token || !data.expires_in) {
       return false
     }
-    const access_token = data.access_token
+    // const access_token = data.access_token
     const expires_in = data.expires_in
     const now = (new Date().getTime())
 
