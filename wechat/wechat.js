@@ -56,11 +56,11 @@ Wechat.prototype.updateAccessToken = function() {
     const appID = this.appID
     const appSecret = this.appSecret
     const url = api.accessToken + '&appid=' + appID + '&secret=' + appSecret
-
     return new Promise(function(resolve, reject) {
+        console.log(url)
+
         request({url: url, json: true}).then(function(response) {
             const data = response.body
-            console.log(data)
             const now = (new Date().getTime())
             const expires_in = now + (data.expires_in - 20) * 1000 // 提前20秒刷新，考虑到网络延迟
 

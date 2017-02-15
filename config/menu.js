@@ -15,6 +15,10 @@ module.exports = {
                     "type": "click",
                     "name": "领取红包",
                     "key": "V100_001"
+                }, {
+                    "type": "view",
+                    "name": "test",
+                    "url": "http://achenjs.55555.io:32280/movie"
                 }
             ]
         }, {

@@ -6,15 +6,17 @@ const getRawBody = require('raw-body')
 const util = require('./util')
 
 module.exports = function(opts, handler) {
-    var wechat = new Wechat(opts)
+    new Wechat(opts)
 
-    return function * (next) {
-        var that = this
+    return function *(next) {
         var token = opts.token
         var signature = this.query.signature
         var timestamp = this.query.timestamp
         var echostr = this.query.echostr
         var nonce = this.query.nonce
+        console.log("token:" + token)
+        console.log("timestamp:" + timestamp)
+        console.log("nonce:" + nonce)
         var str = [token, timestamp, nonce].sort().join('')
         var sha = sha1(str)
 
@@ -22,13 +24,14 @@ module.exports = function(opts, handler) {
             if (sha === signature) {
                 this.body = echostr + ''
             } else {
-                this.body = 'wrong'
+                this.body = '请使用微信浏览器打开!'
             }
         } else if (this.method === 'POST') {
             if (sha !== signature) {
                 this.body = 'wrong'
                 return false
             }
+
             const data = yield getRawBody(this.req, {
                 length: this.length,
                 limit: '1mb',

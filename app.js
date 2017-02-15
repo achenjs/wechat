@@ -1,5 +1,5 @@
 'use strict'
-const port = 4545
+const PORT = 5555
 const Koa = require('koa')
 const g = require('./wechat/g')
 const config = require('./config')
@@ -47,11 +47,13 @@ const tpl = heredoc(function() {/*
 
         var isRecording = false
         $('h1').on('tap', function() {
+          window.alert('1')
           if(!isRecording) {
+              isRecording = true
               wx.startRecord({
                   cancel: function() {
-                  alert('那就不能搜索了！')
-                }
+                    window.alert('那就不能搜索了！')
+                  }
               })
               return
           }
@@ -59,11 +61,12 @@ const tpl = heredoc(function() {/*
           wx.stopRecord({
               success: function (res) {
                   var localId = res.localId
+                  console.log(localId)
                   wx.translateVoice({
-                     localId: localId, // 需要识别的音频的本地Id，由录音相关接口获得
+                      localId: localId, // 需要识别的音频的本地Id，由录音相关接口获得
                       isShowProgressTips: 1, // 默认为1，显示进度提示
                       success: function (res) {
-                          alert(res.translateResult); // 语音识别的结果
+                          window.alert(res.translateResult); // 语音识别的结果
                       }
                   })
               }
@@ -76,12 +79,17 @@ const tpl = heredoc(function() {/*
   </html>
 */})
 
-
-
 app.use(function *(next) {
+  api.getTicket((err, result) => {
+    if(err) {
+      new Error(err)
+    } else {
+      console.log(result)
+    }
+  })
   if(this.url.indexOf('/movie') > -1) {
     var param = {
-     debug: false,
+     debug: true,
      jsApiList: ['startRecord', 'stopRecord', 'onVoiceRecordEnd', 'translateVoice'],
      url: this.href
     };
@@ -106,6 +114,6 @@ app.use(function *(next) {
   yield next
 })
 
-app.use(g(config.wechat, weixin)).listen(port)
-
-console.log('listening: ' + port)
+app.use(g(config.wechat, weixin)).listen(PORT, function() {
+  console.log('listening: ' + PORT)
+})
