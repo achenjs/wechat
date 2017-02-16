@@ -14,7 +14,6 @@ module.exports = {
         },
         saveAccessToken: function(data) {
             data = JSON.stringify(data)
-            console.log(data)
             return util.writeFileAsync(wechat_file, data)
         }
     }

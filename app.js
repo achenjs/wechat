@@ -22,32 +22,34 @@ const tpl = heredoc(function() {/*
   <body>
     <h1>点击标题，开始录音翻译</h1>
     <p id="title"></p>
-    <div id="doctor"></div>
+    <div id="director"></div>
     <div id="year"></div>
     <div id="poster"></div>
-    <script src="http://www.zeptojs.cn/zepto.min.js" charset="utf-8"></script>
+    <script src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js" charset="utf-8"></script>
     <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js" charset="utf-8"></script>
     <script>
       wx.config({
-        debug: <%= debug%>, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
-        appId: '<%= appId%>', // 必填，公众号的唯一标识
-        timestamp: '<%= timestamp%>', // 必填，生成签名的时间戳
-        nonceStr: '<%= nonceStr%>', // 必填，生成签名的随机串
-        signature: '<%= signature%>',// 必填，签名，见附录1
-        jsApiList: '<%= jsApiList%>' // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
-      });
+        debug: <%= debug%>,
+        appId: '<%= appId%>',
+        timestamp: '<%= timestamp%>',
+        nonceStr: '<%= nonceStr%>',
+        signature: '<%= signature%>',
+        jsApiList: ['startRecord', 'stopRecord', 'onVoiceRecordEnd', 'translateVoice']
+      })
+
 
       wx.ready(function() {
         wx.checkJsApi({
           jsApiList: ['onVoiceRecordEnd'],
           success: function(res) {
-            console.log(res)
+
           }
         })
-
+        $('#title').on('click', function(){
+            wx.closeWindow();
+        })
         var isRecording = false
-        $('h1').on('tap', function() {
-          window.alert('1')
+        $('h1').on('click', function() {
           if(!isRecording) {
               isRecording = true
               wx.startRecord({
@@ -57,16 +59,30 @@ const tpl = heredoc(function() {/*
               })
               return
           }
-          isRecording =  false
+          isRecording = false
           wx.stopRecord({
               success: function (res) {
                   var localId = res.localId
-                  console.log(localId)
                   wx.translateVoice({
-                      localId: localId, // 需要识别的音频的本地Id，由录音相关接口获得
-                      isShowProgressTips: 1, // 默认为1，显示进度提示
+                      localId: localId,
+                      isShowProgressTips: 1,
                       success: function (res) {
-                          window.alert(res.translateResult); // 语音识别的结果
+                          var result = res.translateResult
+                          $.ajax({
+                            type: 'get',
+                            url: 'https://api.douban.com/v2/movie/search?q=' + result,
+                            dataType: 'jsonp',
+                            jsonp: 'callback',
+                            success: function(result) {
+                                var data = result.subjects[0]
+                                $('#title').html(data.title)
+                                $('#director').html(data.directors[0].name)
+                                $('#year').html(data.year)
+                                $('#poster').html('<img src="'+ data.images.large +'">')
+
+
+                            }
+                          })
                       }
                   })
               }
@@ -89,8 +105,8 @@ app.use(function *(next) {
   })
   if(this.url.indexOf('/movie') > -1) {
     var param = {
-     debug: true,
-     jsApiList: ['startRecord', 'stopRecord', 'onVoiceRecordEnd', 'translateVoice'],
+     debug: false,
+     jsApiList: [],
      url: this.href
     };
     new Promise((resolve, reject) => {
@@ -103,6 +119,7 @@ app.use(function *(next) {
       })
     })
     .then((value) => {
+      console.log(value)
       this.body = ejs.render(tpl, value)
     })
     .catch((err) => {
