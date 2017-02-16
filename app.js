@@ -34,7 +34,7 @@ const tpl = heredoc(function() {/*
         timestamp: '<%= timestamp%>',
         nonceStr: '<%= nonceStr%>',
         signature: '<%= signature%>',
-        jsApiList: ['startRecord', 'stopRecord', 'onVoiceRecordEnd', 'translateVoice']
+        jsApiList: ['startRecord', 'stopRecord', 'onVoiceRecordEnd', 'translateVoice','onMenuShareAppMessage']
       })
 
 
@@ -80,7 +80,20 @@ const tpl = heredoc(function() {/*
                                 $('#year').html(data.year)
                                 $('#poster').html('<img src="'+ data.images.large +'">')
 
+                                shareContent = {
+                                  title: data.title,
+                                  desc: '我搜出来了：'+ data.title,
+                                  link: 'https://github.achenjs.com',
+                                  imgUrl: data.images.large,
+                                  success: function () {
+                                      window.alert('分享成功')
+                                  },
+                                  cancel: function () {
+                                      window.alert('分享失败')
+                                  }
+                                }
 
+                                wx.onMenuShareAppMessage(shareContent)
                             }
                           })
                       }
