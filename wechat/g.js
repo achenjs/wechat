@@ -1,7 +1,7 @@
 'use strict'
 
 const sha1 = require('sha1')
-const Wechat = require('./wechat')
+const Wechat = require('./reply')
 const getRawBody = require('raw-body')
 const util = require('./util')
 

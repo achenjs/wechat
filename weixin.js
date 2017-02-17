@@ -7,25 +7,7 @@ const path = require('path')
 const opts = require('./config').wechat
 const api = new WechatAPI(opts.appID, opts.appSecret)
 
-new Promise((resolve, reject) => {
-  api.removeMenu((err, result) => {
-    if(err) {
-      reject(err)
-    } else {
-      resolve()
-    }
-  })
-})
-.then(() => {
-  api.createMenu(require('./config/menu'), function(err, result) {
-    if (err) {
-      console.error(err)
-    } else {}
-  })
-})
-
 module.exports = function* (next) {
-
     const message = this.weixinInfo
 
     if (message.MsgType === 'event') {
